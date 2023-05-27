@@ -1,0 +1,1 @@
+This is a plugin used to add rating stars to any taxonomy.
