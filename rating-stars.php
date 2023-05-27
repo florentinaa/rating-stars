@@ -14,7 +14,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       Rating Stars
- * Plugin URI:        https://https://github.com/florentinaa/rating-stars
+ * Plugin URI:        https://github.com/florentinaa/rating-stars
  * Description:       Add rating stars to any taxonomy
  * Version:           1.0.0
  * Author:            Florentina

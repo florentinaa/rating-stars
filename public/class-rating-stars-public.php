@@ -27,9 +27,9 @@ class Rating_Stars_Public {
 	 *
 	 * @since    1.0.0
 	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
+	 * @var      string    $rating_stars    The ID of this plugin.
 	 */
-	private $plugin_name;
+	private $rating_stars;
 
 	/**
 	 * The version of this plugin.
@@ -44,12 +44,12 @@ class Rating_Stars_Public {
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of the plugin.
+	 * @param      string    $rating_stars       The name of the plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct( $rating_stars, $version ) {
 
-		$this->plugin_name = $plugin_name;
+		$this->rating_stars = $rating_stars;
 		$this->version = $version;
 
 	}
@@ -73,7 +73,7 @@ class Rating_Stars_Public {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/rating-stars-public.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->rating_stars, plugin_dir_url( __FILE__ ) . 'css/rating-stars-public.css', array(), $this->version, 'all' );
 
 	}
 
@@ -96,7 +96,7 @@ class Rating_Stars_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/rating-stars-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->rating_stars, plugin_dir_url( __FILE__ ) . 'js/rating-stars-public.js', array( 'jquery' ), $this->version, false );
 
 	}
 

@@ -44,9 +44,9 @@ class Rating_Stars {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      string    $plugin_name    The string used to uniquely identify this plugin.
+	 * @var      string    $rating_stars    The string used to uniquely identify this plugin.
 	 */
-	protected $plugin_name;
+	protected $rating_stars;
 
 	/**
 	 * The current version of the plugin.
@@ -72,7 +72,7 @@ class Rating_Stars {
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name = 'rating-stars';
+		$this->rating_stars = 'rating-stars';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -152,7 +152,7 @@ class Rating_Stars {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Rating_Stars_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Rating_Stars_Admin( $this->get_rating_stars(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -168,7 +168,7 @@ class Rating_Stars {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new Rating_Stars_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Rating_Stars_Public( $this->get_rating_stars(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
@@ -191,8 +191,8 @@ class Rating_Stars {
 	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
 	 */
-	public function get_plugin_name() {
-		return $this->plugin_name;
+	public function get_rating_stars() {
+		return $this->rating_stars;
 	}
 
 	/**

@@ -2,3 +2,26 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+.rating-container,
+.star-rating {
+    display: flex;
+    margin-right: 5px;
+    align-items: baseline;
+}
+.star-rating .first,
+.star-rating .last {
+    padding-right: 15px;
+}
+
+.star-rating input {
+    width: 50px;
+    margin-left: 20px;
+}
+
+.star-rating .last {
+    padding-left: 15px;
+}
+
+.rating-container {
+    align-items: baseline;
+}
