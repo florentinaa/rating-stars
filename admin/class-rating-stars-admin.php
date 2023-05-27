@@ -51,9 +51,8 @@ class Rating_Stars_Admin {
 
 		$this->rating_stars = $rating_stars;
 		$this->version = $version;
-
+		add_action('admin_menu', array( $this, 'addPluginAdminMenu' ), 9);
 		add_action('admin_init', array( $this, 'registerAndBuildFields' ));
-
 	}
 
 	/**
@@ -107,22 +106,22 @@ class Rating_Stars_Admin {
 		add_menu_page(  $this->rating_stars, 'Rating Stars', 'administrator', $this->rating_stars, array( $this, 'displayPluginAdminDashboard' ), 'dashicons-chart-area', 26 );
 		
 		//add_submenu_page( '$parent_slug, $page_title, $menu_title, $capability, $menu_slug, $function );
-		add_submenu_page( $this->rating_stars, 'Plugin Name Settings', 'Settings', 'administrator', $this->rating_stars.'-settings', array( $this, 'displayPluginAdminSettings' ));
+		// add_submenu_page( $this->rating_stars, 'Plugin Name Settings', 'Settings', 'administrator', $this->rating_stars.'-settings', array( $this, 'displayPluginAdminSettings' ));
 	}
 
 	public function displayPluginAdminDashboard() {
-		require_once 'partials'.$this->rating_stars.'-admin-display.php';
+		require_once 'partials/'.$this->rating_stars.'-admin-display.php';
   	}
 
-	  public function displayPluginAdminSettings() {
-		// set this var to be used in the settings-display view
-		$active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'general';
-		if(isset($_GET['error_message'])){
-			add_action('admin_notices', array($this,'pluginNameSettingsMessages'));
-			do_action( 'admin_notices', $_GET['error_message'] );
-		}
-		require_once 'partials/'.$this->rating_stars.'-admin-settings-display.php';
-	}
+	// public function displayPluginAdminSettings() {
+	// 	// set this var to be used in the settings-display view
+	// 	$active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'general';
+	// 	if(isset($_GET['error_message'])){
+	// 		add_action('admin_notices', array($this,'pluginNameSettingsMessages'));
+	// 		do_action( 'admin_notices', $_GET['error_message'] );
+	// 	}
+	// 	require_once 'partials/'.$this->rating_stars.'-admin-settings-display.php';
+	// }
 
 	public function pluginNameSettingsMessages($error_message){
 		switch ($error_message) {
@@ -159,18 +158,16 @@ class Rating_Stars_Admin {
 		);
 		unset($args);
 		$args = array (
-					'type'      => 'input',
-					'subtype'   => 'text',
-					'id'    => 'rating_stars__setting',
-					'name'      => 'rating_stars__setting',
-					'required' => 'true',
+					'type' => 'select',
+					'id' => 'rating_stars__setting',
+					'name' => 'rating_stars__setting',
 					'get_options_list' => '',
 					'value_type'=>'normal',
 					'wp_data' => 'option'
 				);
 		add_settings_field(
 			'rating_stars__setting',
-			'Example Setting',
+			'Select Post Type',
 			array( $this, 'rating_stars_render_settings_field' ),
 			'rating_stars_general_settings',
 			'rating_stars_general_section',
@@ -189,46 +186,31 @@ class Rating_Stars_Admin {
 		echo '<p>These settings apply to all Plugin Name functionality.</p>';
 	}
 		
-	public function rating_stars_render_settings_field($args) {
-		/* EXAMPLE INPUT
-				  'type'      => 'input',
-				  'subtype'   => '',
-				  'id'    => $this->rating_stars.'__setting',
-				  'name'      => $this->rating_stars.'__setting',
-				  'required' => 'required="required"',
-				  'get_option_list' => "",
-					'value_type' = serialized OR normal,
-		'wp_data'=>(option or post_meta),
-		'post_id' =>
-		*/     
+	public function rating_stars_render_settings_field($args) {  
 		if($args['wp_data'] == 'option'){
 			$wp_data_value = get_option($args['name']);
 		} elseif($args['wp_data'] == 'post_meta'){
 			$wp_data_value = get_post_meta($args['post_id'], $args['name'], true );
 		}
-
+		$argms = array(
+			'public'   => true
+		 );
+	 
+		$output = 'names'; // names or objects, note names is the default
+		$operator = 'and'; // 'and' or 'or'
+	 
+		$taxonomies = get_post_types( $argms, $output, $operator );
+		$post_type = '';
+		
+		$options = get_option( 'rating_stars_general_settings' );
 		switch ($args['type']) {
-
-			case 'input':
-				$value = ($args['value_type'] == 'serialized') ? serialize($wp_data_value) : $wp_data_value;
-				if($args['subtype'] != 'checkbox'){
-					$prependStart = (isset($args['prepend_value'])) ? '<div class="input-prepend"> <span class="add-on">'.$args['prepend_value'].'</span>' : '';
-					$prependEnd = (isset($args['prepend_value'])) ? '</div>' : '';
-					$step = (isset($args['step'])) ? 'step="'.$args['step'].'"' : '';
-					$min = (isset($args['min'])) ? 'min="'.$args['min'].'"' : '';
-					$max = (isset($args['max'])) ? 'max="'.$args['max'].'"' : '';
-					if(isset($args['disabled'])){
-						// hide the actual input bc if it was just a disabled input the informaiton saved in the database would be wrong - bc it would pass empty values and wipe the actual information
-						echo $prependStart.'<input type="'.$args['subtype'].'" id="'.$args['id'].'_disabled" '.$step.' '.$max.' '.$min.' name="'.$args['name'].'_disabled" size="40" disabled value="' . esc_attr($value) . '" /><input type="hidden" id="'.$args['id'].'" '.$step.' '.$max.' '.$min.' name="'.$args['name'].'" size="40" value="' . esc_attr($value) . '" />'.$prependEnd;
-					} else {
-						echo $prependStart.'<input type="'.$args['subtype'].'" id="'.$args['id'].'" "'.$args['required'].'" '.$step.' '.$max.' '.$min.' name="'.$args['name'].'" size="40" value="' . esc_attr($value) . '" />'.$prependEnd;
-					}
-					/*<input required="required" '.$disabled.' type="number" step="any" id="'.$this->rating_stars.'_cost2" name="'.$this->rating_stars.'_cost2" value="' . esc_attr( $cost ) . '" size="25" /><input type="hidden" id="'.$this->rating_stars.'_cost" step="any" name="'.$this->rating_stars.'_cost" value="' . esc_attr( $cost ) . '" />*/
-
-				} else {
-					$checked = ($value) ? 'checked' : '';
-					echo '<input type="'.$args['subtype'].'" id="'.$args['id'].'" "'.$args['required'].'" name="'.$args['name'].'" size="40" value="1" '.$checked.' />';
+			
+			case 'select':
+				
+				foreach ($taxonomies as $taxonomy) {
+					$post_type .= '<option value="' . $taxonomy . '">' . $taxonomy . '</option>';
 				}
+				echo '<select>' . $post_type . '</select>';
 				break;
 			default:
 				# code...

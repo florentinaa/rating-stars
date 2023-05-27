@@ -73,7 +73,7 @@ class Rating_Stars {
 			$this->version = '1.0.0';
 		}
 		$this->rating_stars = 'rating-stars';
-
+		
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
@@ -156,7 +156,6 @@ class Rating_Stars {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-
 	}
 
 	/**
