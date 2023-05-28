@@ -25,3 +25,9 @@
 .rating-container {
     align-items: baseline;
 }
+.rating-stars {
+    display: none;
+}
+.rating-stars.show-rating {
+    display: block;
+}

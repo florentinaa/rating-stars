@@ -51,8 +51,11 @@ class Rating_Stars_Admin {
 
 		$this->rating_stars = $rating_stars;
 		$this->version = $version;
-		add_action('admin_menu', array( $this, 'addPluginAdminMenu' ), 9);
-		add_action('admin_init', array( $this, 'registerAndBuildFields' ));
+		// add_action('product_edit_form_fields', array( $this, 'edit_rating_field' ));
+		add_action( 'add_meta_boxes',  array( $this, 'rating_add_custom_box') );
+			//Add rating to admin taxonomy
+		add_action( 'save_post_wporg_product',  array( $this, 'update_rating_field'));
+		add_action( 'save_post', array( $this, 'show_rating_option_save'));
 	}
 
 	/**
@@ -73,7 +76,10 @@ class Rating_Stars_Admin {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-
+		wp_enqueue_style(
+			'font-awesome',
+			"//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"
+		);
 		wp_enqueue_style( $this->rating_stars, plugin_dir_url( __FILE__ ) . 'css/rating-stars-admin.css', array(), $this->version, 'all' );
 
 	}
@@ -101,120 +107,151 @@ class Rating_Stars_Admin {
 
 	}
 
-	public function addPluginAdminMenu() {
-		//add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position );
-		add_menu_page(  $this->rating_stars, 'Rating Stars', 'administrator', $this->rating_stars, array( $this, 'displayPluginAdminDashboard' ), 'dashicons-chart-area', 26 );
-		
-		//add_submenu_page( '$parent_slug, $page_title, $menu_title, $capability, $menu_slug, $function );
-		// add_submenu_page( $this->rating_stars, 'Plugin Name Settings', 'Settings', 'administrator', $this->rating_stars.'-settings', array( $this, 'displayPluginAdminSettings' ));
-	}
-
-	public function displayPluginAdminDashboard() {
-		require_once 'partials/'.$this->rating_stars.'-admin-display.php';
-  	}
-
-	// public function displayPluginAdminSettings() {
-	// 	// set this var to be used in the settings-display view
-	// 	$active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'general';
-	// 	if(isset($_GET['error_message'])){
-	// 		add_action('admin_notices', array($this,'pluginNameSettingsMessages'));
-	// 		do_action( 'admin_notices', $_GET['error_message'] );
-	// 	}
-	// 	require_once 'partials/'.$this->rating_stars.'-admin-settings-display.php';
-	// }
-
-	public function pluginNameSettingsMessages($error_message){
-		switch ($error_message) {
-			case '1':
-				$message = __( 'There was an error adding this setting. Please try again.  If this persists, shoot us an email.', 'my-text-domain' );                 
-				$err_code = esc_attr( 'rating_stars__setting' );                 
-				$setting_field = 'rating_stars__setting';                 
-				break;
+	public function rating_add_custom_box(){
+		$screens = [ 'post', 'wporg_product' ];
+		foreach ( $screens as $screen ) {
+			add_meta_box(
+				'rating_box_id',                 // Unique ID
+				'Rating Stars',      // Box title
+				array( $this, 'edit_rating_field' ),  // Content callback, must be of type callable
+				$screen                            // Post type
+			);
 		}
-		$type = 'error';
-		add_settings_error(
-			   $setting_field,
-			   $err_code,
-			   $message,
-			   $type
-		   );
 	}
 
-	public function registerAndBuildFields() {
-		/**
-	   * First, we add_settings_section. This is necessary since all future settings must belong to one.
-	   * Second, add_settings_field
-	   * Third, register_setting
-	   */     
-		add_settings_section(
-			// ID used to identify this section and with which to register options
-			'rating_stars_general_section', 
-			// Title to be displayed on the administration page
-			'',  
-			// Callback used to render the description of the section
-			array( $this, 'rating_stars_display_general_account' ),    
-			// Page on which to add this section of options
-			'rating_stars_general_settings'                   
-		);
-		unset($args);
-		$args = array (
-					'type' => 'select',
-					'id' => 'rating_stars__setting',
-					'name' => 'rating_stars__setting',
-					'get_options_list' => '',
-					'value_type'=>'normal',
-					'wp_data' => 'option'
-				);
-		add_settings_field(
-			'rating_stars__setting',
-			'Select Post Type',
-			array( $this, 'rating_stars_render_settings_field' ),
-			'rating_stars_general_settings',
-			'rating_stars_general_section',
-			$args
+	public function edit_rating_field($post){
+		$post_id = $post->ID;
+		$rating_0_5star = get_post_meta($post_id, 'votes-0.5', true) ? get_post_meta($post_id, 'votes-0.5', true) : 0;
+		$rating_1star = get_post_meta($post_id, 'votes-1', true) ? get_post_meta($post_id, 'votes-1', true) : 0;
+		$rating_1_5star = get_post_meta($post_id, 'votes-1.5', true) ? get_post_meta($post_id, 'votes-1.5', true) : 0;
+		$rating_2stars = get_post_meta($post_id, 'votes-2', true) ? get_post_meta($post_id, 'votes-2', true) : 0;
+		$rating_2_5star = get_post_meta($post_id, 'votes-2.5', true) ? get_post_meta($post_id, 'votes-2.5', true) : 0;
+		$rating_3stars = get_post_meta($post_id, 'votes-3', true) ? get_post_meta($post_id, 'votes-3', true) : 0;
+		$rating_3_5star = get_post_meta($post_id, 'votes-3.5', true) ? get_post_meta($post_id, 'votes-3.5', true) : 0;
+		$rating_4stars = get_post_meta($post_id, 'votes-4', true) ? get_post_meta($post_id, 'votes-4', true) : 0;
+		$rating_4_5star = get_post_meta($post_id, 'votes-4.5', true) ? get_post_meta($post_id, 'votes-4.5', true) : 0;
+		$rating_5stars = get_post_meta($post_id, 'votes-5', true) ? get_post_meta($post_id, 'votes-5', true) : 0;
+		$ratings = [
+			"0.5" => $rating_0_5star, 
+			"1" => $rating_1star, 
+			"1.5" => $rating_1_5star, 
+			"2" => $rating_2stars,
+			"2.5" => $rating_2_5star,
+			"3" => $rating_3stars,
+			"3.5" => $rating_3_5star,
+			"4" => $rating_4stars, 
+			"4.5" => $rating_4_5star,
+			"5" => $rating_5stars
+		];
+		$avg = 0;
+		$no_votes = 0;
+		
+		foreach ($ratings as $index => $rating){
+			$avg += $index*$rating;
+			$no_votes += $rating;
+		}
+		$stars_avg = $no_votes ? $avg/$no_votes : $avg;
+		$starClasses = ['fa fa-star-o', 'fa fa-star-half-o', 'fa fa-star'];
+									
+		printf(
+			'<script>window.starClasses = %s</script>',
+			json_encode($starClasses)
 		);
 
-
-		register_setting(
-				'rating_stars_general_settings',
-				'rating_stars__setting'
-				);
-
-	}
-
-	public function rating_stars_display_general_account() {
-		echo '<p>These settings apply to all Plugin Name functionality.</p>';
-	}
-		
-	public function rating_stars_render_settings_field($args) {  
-		if($args['wp_data'] == 'option'){
-			$wp_data_value = get_option($args['name']);
-		} elseif($args['wp_data'] == 'post_meta'){
-			$wp_data_value = get_post_meta($args['post_id'], $args['name'], true );
-		}
-		$argms = array(
-			'public'   => true
-		 );
-	 
-		$output = 'names'; // names or objects, note names is the default
-		$operator = 'and'; // 'and' or 'or'
-	 
-		$taxonomies = get_post_types( $argms, $output, $operator );
-		$post_type = '';
-		
-		$options = get_option( 'rating_stars_general_settings' );
-		switch ($args['type']) {
-			
-			case 'select':
+		$values = get_post_meta( $post_id );
+		$show_rating_stars_check = isset( $values['show_rating_stars_check'] ) && $values['show_rating_stars_check'][0] == 1? 1 : 0;
+		wp_nonce_field( 'my_show_rating_stars_nonce', 'show_rating_nonce' );
+		?>
+		<p>
+			<label>
+				<input type="checkbox" name="show_rating_stars_check" id="show_rating_stars_check" value="1" <?php checked( $show_rating_stars_check, 1); ?> /><?= __('Display rating stars?'); ?>
+			</label>
+		</p>
+		<?php 
+			$rating_class = '';
+		?>
+		<?php
+		if (isset($values['show_rating_stars_check'][0]) && $values['show_rating_stars_check'][0]==1): 
+			$rating_class = 'show-rating';
+		endif;
+		?>
+		<div class="rating-stars <?= $rating_class ?>">
+			<div class="rating-container">
+				<ul class="star-rating" id="rating-store">
+					<?php for ($index = 1; $index <= 5; $index++) : ?>
+						<?php if ($index <= $stars_avg) : ?>
+							<li><i class="star-<?= $index ?> fa fa-star"></i></li>
+						<?php elseif ($index - .5 == $stars_avg) : ?>
+							<li><i class="star-<?= $index ?> fa fa-star-half-o"></i></li>
+						<?php else : ?>
+							<li><i class="star-<?= $index ?> fa fa-star-o"></i></li>
+						<?php endif; ?>
+					<?php endfor; ?>
+				</ul>
 				
-				foreach ($taxonomies as $taxonomy) {
-					$post_type .= '<option value="' . $taxonomy . '">' . $taxonomy . '</option>';
-				}
-				echo '<select>' . $post_type . '</select>';
-				break;
-			default:
-				# code...
-				break;
-		}
-		}
+				<input type="hidden" id="star-rating-hidden" data-allow-half="1" name="star-rating-hidden" value="<?= $stars_avg ?>">
+				<?php if ($no_votes) {?>
+				<div>(<?= $no_votes  ?> <?= __('voturi', 'couponis') ?>) </div>
+				<?php } else { ?>
+					<div>(<?= __('Nici un vot inca', 'couponis') ?>) </div>
+				<?php }; ?>
+			</div>
+			<?php for ($index = 1; $index <= 5; $index++) : ?>
+				<ul class="star-rating"> <li class="first"><?= $index . __(' Star(s): ') ?></li>
+				<?php foreach (range(1, $index) as $star) : ?>
+					<li><i class="star-<?= $star ?> fa fa-star"></i></li>
+				<?php endforeach; ?>
+				<li class="last">
+					<?php $votes = get_post_meta($post_id, 'votes-' .$index. '', true) ? get_post_meta($post_id, 'votes-' .$index. '', true) : 0;?>
+					<?=  ' ' . $votes. __(' votes') ?><input type="number" name="votes-<?= $index ?>" id="votes-<?= $index ?>" value="<?= $votes ?>" max="100"/>
+				</li>
+				</ul>
+			<?php endfor; ?>
+		</div>
+		<?php
+	}
+
+	public function show_rating_option_save( $post_id )
+	{
+		// Bail if we're doing an auto save
+		// if( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+	
+		// if our nonce isn't there, or we can't verify it, bail
+		// if( !isset( $_POST['rating_stars_nonce'] ) || !wp_verify_nonce( $_POST['rating_stars_nonce'], 'my_show_rating_stars_nonce' ) ) return;
+	
+		// if our current user can't edit this post, bail
+		// if( !current_user_can( 'edit_post' ) ) return;
+	
+		$show_rating_stars_check = ($_POST["show_rating_stars_check"]==1) ? 1 : 0;
+		update_post_meta($post_id, "show_rating_stars_check", $show_rating_stars_check);
+	
+	}
+
+	public function update_rating_field( $post_id ){
+		update_post_meta(
+			$post_id,
+			'votes-1',
+			$_POST[ 'votes-1' ]
+		);
+		update_post_meta(
+			$post_id,
+			'votes-2',
+			$_POST[ 'votes-2' ]
+		);
+		update_post_meta(
+			$post_id,
+			'votes-3',
+			$_POST[ 'votes-3' ]
+		);
+		update_post_meta(
+			$post_id,
+			'votes-4',
+			$_POST[ 'votes-4' ]
+		);
+		update_post_meta(
+			$post_id,
+			'votes-5',
+			$_POST[ 'votes-5' ]
+		);
+	}
 }
