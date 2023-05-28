@@ -1,32 +1,123 @@
 (function( $ ) {
 	'use strict';
-
-	/**
-	 * All of the code for your public-facing JavaScript source
-	 * should reside in this file.
-	 *
-	 * Note: It has been assumed you will write jQuery code here, so the
-	 * $ function reference has been prepared for usage within the scope
-	 * of this function.
-	 *
-	 * This enables you to define handlers, for when the DOM is ready:
-	 *
-	 * $(function() {
-	 *
-	 * });
-	 *
-	 * When the window is loaded:
-	 *
-	 * $( window ).load(function() {
-	 *
-	 * });
-	 *
-	 * ...and/or other possibilities.
-	 *
-	 * Ideally, it is not considered best practise to attach more than a
-	 * single DOM-ready or window-load handler for a particular page.
-	 * Although scripts in the WordPress core, Plugins and Themes may be
-	 * practising this, we should strive to set a better example in our own work.
-	 */
+	//Stars Rating
+	jQuery(document).ready(function($){
+		function initialiseField( $el ) {
+			var container = $el.closest('.rating-container');
+			var starList = $("ul", container);
+			var starListItems = $("li", starList);
+			var starListItemStars = $("i", starListItems);
+			var starField = $("input", container);
+			var clearButton = $("a.clear-button", container);
+			var allowHalf = (starField.data('allow-half') == 1);
+			var emptyClass = window.starClasses[0];
+			var halfClass = window.starClasses[1];
+			var fullClass = window.starClasses[2];
+	
+			starListItems.bind("click", function(e){
+				e.preventDefault();
+	
+				var starValue = $(this).index();
+				starField.val(starValue + 1);
+				
+				if (allowHalf) {
+					var width = $(this).innerWidth();
+					var offset = $(this).offset(); 
+					var leftSideClicked = (width / 2) > (e.pageX - offset.left);
+	
+					if (leftSideClicked) {
+						starField.val(starField.val() - 0.5);
+					}
+				}
+	
+				clearActiveStarClassesFromList();
+	
+				starListItems.each(function(index){
+					var icon = $('i', $(this));
+					var starValue = starField.val();
+	
+					if (index < starValue) {
+						icon.removeClass(emptyClass)
+							.removeClass(halfClass)
+							.addClass(fullClass);
+	
+						if (allowHalf && (index + .5 == starValue)) {
+							icon.removeClass(fullClass);
+							icon.addClass(halfClass);
+						}
+					}
+				});
+	
+				starField.trigger("change");
+			});
+	
+			clearButton.bind("click", function(e){
+				e.preventDefault();
+	
+				clearActiveStarClassesFromList();
+	
+				starField.val(0);
+	
+				starField.trigger("change");
+			});
+	
+			function clearActiveStarClassesFromList()
+			{
+				starListItemStars
+					.removeClass(fullClass)
+					.removeClass(halfClass)
+					.addClass(emptyClass);
+			}	
+		}
+		var rateId= $('.store-info').find('.star-rating').attr('id'),
+			stored = localStorage.getItem('saved-' + rateId);
+		if (!stored) {
+	
+			$('.star-rating').on('click', function(){
+				initialiseField($(this));
+			});
+			$('.add-rating').on('click', function(e){
+				var $this = $(this);
+				e.preventDefault();
+				if ($('#star-rating-hidden').val() != 0) {
+					const stars = e.target.getAttribute('data-stars'),
+					updatedStars = $('#star-rating-hidden').val();
+					e.target.setAttribute('data-stars', updatedStars);
+				}
+				
+				$.ajax({
+					type : "POST",
+					dataType : 'text',
+					url : ajax_object.url,
+					data : {
+						'action': 'rating_ajax',
+						'post-id': $this.data('term'),
+						'stars': $this.data('stars')
+					},
+					success: function(response) {
+						if ($('#star-rating-hidden').val() != 0) {
+							const rateId = $this.closest('.store-info').find('.star-rating').attr('id');
+							localStorage.setItem('saved-' + rateId, true);
+							$this.removeClass('add-rating').addClass('rating-sent').text('Multumim!');
+							setTimeout(function(){
+								$('.rating-sent').hide();
+							}, 5000);
+						} else {
+							$('<div class="select-rating-validation">Te rugam sa selectezi numarul de stele</div>').insertAfter('.add-rating');
+							setTimeout(function(){
+								$('.select-rating-validation').hide();
+							}, 3000);
+						}
+						
+					},
+					error :function(error) {
+						alert('Nu s-a putut valida feedbackul');
+					}
+				});
+			});
+		} else {
+			$('.add-rating').hide();
+		}
+	});
 
 })( jQuery );

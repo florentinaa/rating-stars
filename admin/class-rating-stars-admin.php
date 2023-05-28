@@ -108,18 +108,26 @@ class Rating_Stars_Admin {
 	}
 
 	public function rating_add_custom_box(){
-		$screens = [ 'post', 'wporg_product' ];
-		foreach ( $screens as $screen ) {
+		$args = array(
+			'public'   => true,
+			'_builtin' => false,
+		 );
+	 
+		$output = 'names'; // names or objects, note names is the default
+		$operator = 'and'; // 'and' or 'or'
+		$post_types = [ 'post', 'page' ];
+		array_push($post_types, get_post_types( $args, $output, $operator ));
+		foreach ($post_types as $post_type ) {
 			add_meta_box(
 				'rating_box_id',                 // Unique ID
 				'Rating Stars',      // Box title
-				array( $this, 'edit_rating_field' ),  // Content callback, must be of type callable
-				$screen                            // Post type
+				array( $this, 'add_post_rating_field' ),  // Content callback, must be of type callable
+				$post_types                            // Post type
 			);
 		}
 	}
 
-	public function edit_rating_field($post){
+	public function add_post_rating_field($post){
 		$post_id = $post->ID;
 		$rating_0_5star = get_post_meta($post_id, 'votes-0.5', true) ? get_post_meta($post_id, 'votes-0.5', true) : 0;
 		$rating_1star = get_post_meta($post_id, 'votes-1', true) ? get_post_meta($post_id, 'votes-1', true) : 0;
@@ -191,9 +199,9 @@ class Rating_Stars_Admin {
 				
 				<input type="hidden" id="star-rating-hidden" data-allow-half="1" name="star-rating-hidden" value="<?= $stars_avg ?>">
 				<?php if ($no_votes) {?>
-				<div>(<?= $no_votes  ?> <?= __('voturi', 'couponis') ?>) </div>
+				<div>(<?= $no_votes  ?> <?= __('Votes', 'rating-stars') ?>) </div>
 				<?php } else { ?>
-					<div>(<?= __('Nici un vot inca', 'couponis') ?>) </div>
+					<div>(<?= __('No rating yet', 'rating-stars') ?>) </div>
 				<?php }; ?>
 			</div>
 			<?php for ($index = 1; $index <= 5; $index++) : ?>
@@ -213,14 +221,9 @@ class Rating_Stars_Admin {
 
 	public function show_rating_option_save( $post_id )
 	{
-		// Bail if we're doing an auto save
-		// if( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
-	
+		
 		// if our nonce isn't there, or we can't verify it, bail
-		// if( !isset( $_POST['rating_stars_nonce'] ) || !wp_verify_nonce( $_POST['rating_stars_nonce'], 'my_show_rating_stars_nonce' ) ) return;
-	
-		// if our current user can't edit this post, bail
-		// if( !current_user_can( 'edit_post' ) ) return;
+		if( !isset( $_POST['show_rating_nonce'] ) || !wp_verify_nonce( $_POST['show_rating_nonce'], 'my_show_rating_stars_nonce' ) ) return;
 	
 		$show_rating_stars_check = ($_POST["show_rating_stars_check"]==1) ? 1 : 0;
 		update_post_meta($post_id, "show_rating_stars_check", $show_rating_stars_check);
