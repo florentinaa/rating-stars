@@ -54,7 +54,7 @@ class Rating_Stars_Admin {
 		// add_action('product_edit_form_fields', array( $this, 'edit_rating_field' ));
 		add_action( 'add_meta_boxes',  array( $this, 'rating_add_custom_box') );
 			//Add rating to admin taxonomy
-		add_action( 'save_post_wporg_product',  array( $this, 'update_rating_field'));
+		add_action( 'save_post',  array( $this, 'update_rating_field'));
 		add_action( 'save_post', array( $this, 'show_rating_option_save'));
 	}
 

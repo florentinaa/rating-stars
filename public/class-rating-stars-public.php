@@ -55,6 +55,9 @@ class Rating_Stars_Public {
 		add_action('wp_ajax_rating_ajax', array($this, 'rating_ajax'));
 		add_action( 'wp_ajax_nopriv_rating_ajax', array($this, 'rating_ajax'));
 		add_filter( 'the_content', array($this, 'add_rating_stars'), 1);
+		// add_filter( 'the_title', array($this, 'add_rating_stars_product_page'), 1);
+		remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_title', 5);
+		add_action( 'woocommerce_single_product_summary', array($this, 'add_rating_stars_product_page'), 6);
 	}
 
 	/**
@@ -113,9 +116,16 @@ class Rating_Stars_Public {
 	}	
 
 	public function add_rating_stars( $content ) {
-		if ( is_singular() && in_the_loop() && is_main_query() ) {
+		if ( is_singular() && in_the_loop() && is_main_query() && !is_product() ) {
 			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/rating-stars-public-display.php';
 			return $html . $content;
+		}
+	}
+
+	public function add_rating_stars_product_page( $title ) {
+		if ( is_product() ) {
+			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/rating-stars-public-display.php';
+			the_title( $html );
 		}
 	}
 

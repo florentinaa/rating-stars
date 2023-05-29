@@ -12,8 +12,11 @@
     list-style-type: none;
     padding-left: 0;
     margin: 0;
+    margin-top: 5px;
     margin-right: 10px;
     cursor: pointer;
+    min-width: 120px;
+    height: 30px;
 }
 .rating-container .star-rating:hover {
     color: #FDCC0D;
@@ -34,4 +37,9 @@
 .rating-container .select-rating-validation {
     color:red;
     margin-left: 10px;
+}
+
+/** Woocommerce */
+.woocommerce .star-rating::before {
+    display: none;
 }
