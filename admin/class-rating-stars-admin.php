@@ -226,6 +226,7 @@ class Rating_Stars_Admin {
 		if( !isset( $_POST['show_rating_nonce'] ) || !wp_verify_nonce( $_POST['show_rating_nonce'], 'my_show_rating_stars_nonce' ) ) return;
 	
 		$show_rating_stars_check = ($_POST["show_rating_stars_check"]==1) ? 1 : 0;
+		
 		update_post_meta($post_id, "show_rating_stars_check", $show_rating_stars_check);
 	
 	}

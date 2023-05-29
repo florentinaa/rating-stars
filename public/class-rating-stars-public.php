@@ -54,7 +54,7 @@ class Rating_Stars_Public {
 
 		add_action('wp_ajax_rating_ajax', array($this, 'rating_ajax'));
 		add_action( 'wp_ajax_nopriv_rating_ajax', array($this, 'rating_ajax'));
-		add_shortcode( 'rating-stars', array($this, 'add_rating_stars'));
+		add_filter( 'the_content', array($this, 'add_rating_stars'), 1);
 	}
 
 	/**
@@ -103,17 +103,20 @@ class Rating_Stars_Public {
    
 		$numbers_stars = floatval($_POST['stars']);
 		$post_id = intval($_POST['post_id']);
-		$numbers_votes = intval(get_term_meta($post_id, 'votes-'.$numbers_stars, true));
+		$numbers_votes = intval(get_post_meta($post_id, 'votes-'.$numbers_stars, true));
 		$new_no = strval($numbers_votes+1);
 	
-		update_term_meta($post_id, 'votes-'.$numbers_stars, $new_no);
+		update_post_meta($post_id, 'votes-'.$numbers_stars, $new_no);
 
 		// Don't forget to stop execution afterward.
 		die();
 	}	
 
 	public function add_rating_stars( $content ) {
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/rating-stars-public-display.php';
+		if ( is_singular() && in_the_loop() && is_main_query() ) {
+			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/rating-stars-public-display.php';
+			return $html . $content;
+		}
 	}
 
 }

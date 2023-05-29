@@ -4,12 +4,14 @@
  */
 .rating-container {
    display: flex;
+   align-items: baseline;
 }
 .rating-container .star-rating {
     display: flex;
     color: #FFDF00;
     list-style-type: none;
     padding-left: 0;
+    margin: 0;
     margin-right: 10px;
     cursor: pointer;
 }
@@ -17,7 +19,7 @@
     color: #FDCC0D;
 }
 .rating-container .star-rating i::before {
-    font-size: 20px;
+    font-size: 26px;
 }
 .rating-container .add-rating {
     cursor: pointer;
@@ -27,7 +29,7 @@
 .rating-container .rating-sent {
     display: block;
     margin-left: 10px;
-    color: red;
+    color: green;
 }
 .rating-container .select-rating-validation {
     color:red;

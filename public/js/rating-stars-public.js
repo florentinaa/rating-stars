@@ -69,9 +69,9 @@
 					.addClass(emptyClass);
 			}	
 		}
-		var rateId= $('.store-info').find('.star-rating').attr('id'),
+		var rateId= $(document).find('.star-rating').attr('id'),
 			stored = localStorage.getItem('saved-' + rateId);
-		if (!stored) {
+		if (true) {
 	
 			$('.star-rating').on('click', function(){
 				initialiseField($(this));
@@ -91,14 +91,14 @@
 					url : ajax_object.url,
 					data : {
 						'action': 'rating_ajax',
-						'post-id': $this.data('term'),
+						'post_id': $this.data('postid'),
 						'stars': $this.data('stars')
 					},
 					success: function(response) {
 						if ($('#star-rating-hidden').val() != 0) {
 							const rateId = $this.closest('.store-info').find('.star-rating').attr('id');
 							localStorage.setItem('saved-' + rateId, true);
-							$this.removeClass('add-rating').addClass('rating-sent').text('Multumim!');
+							$this.removeClass('add-rating').addClass('rating-sent').text('Thank you!');
 							setTimeout(function(){
 								$('.rating-sent').hide();
 							}, 5000);
@@ -112,6 +112,7 @@
 					},
 					error :function(error) {
 						alert('Nu s-a putut valida feedbackul');
+						console.log(error);
 					}
 				});
 			});
