@@ -69,9 +69,9 @@
 					.addClass(emptyClass);
 			}	
 		}
-		var rateId= $(document).find('.star-rating').attr('id'),
+		var rateId = $(document).find('.star-rating').attr('id'),
 			stored = localStorage.getItem('saved-' + rateId);
-		if (true) {
+		if (!stored) {
 	
 			$('.star-rating').on('click', function(){
 				initialiseField($(this));
@@ -96,7 +96,7 @@
 					},
 					success: function(response) {
 						if ($('#star-rating-hidden').val() != 0) {
-							const rateId = $this.closest('.store-info').find('.star-rating').attr('id');
+							const rateId = $this.closest('.rating-container').find('.star-rating').attr('id');
 							localStorage.setItem('saved-' + rateId, true);
 							$this.removeClass('add-rating').addClass('rating-sent').text('Thank you!');
 							setTimeout(function(){
